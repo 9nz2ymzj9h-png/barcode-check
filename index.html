@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -39,9 +40,9 @@ h1 {
 }
 
 
-/* ------------------------------------------
+/* ==========================================
    바코드 종류 선택
------------------------------------------- */
+========================================== */
 
 .format-area {
     margin-bottom: 15px;
@@ -66,9 +67,9 @@ h1 {
 }
 
 
-/* ------------------------------------------
-   A / B 영역
------------------------------------------- */
+/* ==========================================
+   A / B
+========================================== */
 
 .row {
     display: flex;
@@ -94,9 +95,9 @@ input {
 }
 
 
-/* ------------------------------------------
+/* ==========================================
    상태
------------------------------------------- */
+========================================== */
 
 #status {
     margin: 15px 0;
@@ -108,9 +109,9 @@ input {
 }
 
 
-/* ------------------------------------------
+/* ==========================================
    카메라 영역
------------------------------------------- */
+========================================== */
 
 #reader {
     width: 100%;
@@ -118,12 +119,12 @@ input {
     overflow: hidden;
     border-radius: 10px;
     background: #000;
+    position: relative;
 }
 
 
 /*
-   html5-qrcode가 생성하는 인식 영역을
-   화면에서 보기 좋게 유지
+   html5-qrcode 내부 영역
 */
 
 #reader__scan_region {
@@ -131,9 +132,74 @@ input {
 }
 
 
-/* ------------------------------------------
+/*
+   카메라 영상
+*/
+
+#reader video {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover;
+}
+
+
+/* ==========================================
+   사용자에게 보여주는 스캔 영역
+========================================== */
+
+#scanOverlay {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border: 3px solid #00ff66;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 0 0 9999px rgba(0, 0, 0, 0.30);
+
+    pointer-events: none;
+
+    z-index: 20;
+
+    transition:
+        width 0.2s ease,
+        height 0.2s ease;
+}
+
+
+/*
+   가운데 가이드라인
+*/
+
+#scanOverlay::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 8%;
+
+    right: 8%;
+
+    top: 50%;
+
+    height: 2px;
+
+    background: rgba(255, 0, 0, 0.8);
+
+    transform: translateY(-50%);
+
+}
+
+
+/* ==========================================
    결과
------------------------------------------- */
+========================================== */
 
 #result {
     margin: 15px 0;
@@ -155,9 +221,9 @@ input {
 }
 
 
-/* ------------------------------------------
+/* ==========================================
    버튼
------------------------------------------- */
+========================================== */
 
 .button-area {
     display: flex;
@@ -188,9 +254,9 @@ button:disabled {
 }
 
 
-/* ------------------------------------------
-   인식 영역 안내
------------------------------------------- */
+/* ==========================================
+   안내
+========================================== */
 
 .guide-text {
     margin-top: 8px;
@@ -199,9 +265,9 @@ button:disabled {
 }
 
 
-/* ------------------------------------------
+/* ==========================================
    디버그
------------------------------------------- */
+========================================== */
 
 #debug {
     margin-top: 15px;
@@ -217,8 +283,9 @@ button:disabled {
 </style>
 
 
-<script src="https://unpkg.com/html5-qrcode"
-        type="text/javascript">
+<script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript">
 </script>
 
 </head>
@@ -233,9 +300,9 @@ button:disabled {
 <h1>📦 바코드 검사</h1>
 
 
-<!-- ---------------------------------------
-     바코드 종류 선택
----------------------------------------- -->
+<!-- ==========================================
+     바코드 종류
+========================================== -->
 
 <div class="format-area">
 
@@ -266,9 +333,9 @@ button:disabled {
 </div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      A
----------------------------------------- -->
+========================================== -->
 
 <div class="row">
 
@@ -285,9 +352,9 @@ button:disabled {
 </div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      B
----------------------------------------- -->
+========================================== -->
 
 <div class="row">
 
@@ -304,39 +371,46 @@ button:disabled {
 </div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      상태
----------------------------------------- -->
+========================================== -->
 
 <div id="status">
+
     🔵 검사할 바코드 종류를 선택하고 검사를 시작하세요.
+
 </div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      카메라
----------------------------------------- -->
+========================================== -->
 
-<div id="reader"></div>
+<div id="reader">
+
+    <!-- 실제 스캔 영역 안내 -->
+    <div id="scanOverlay"></div>
+
+</div>
 
 
 <div class="guide-text">
 
-    바코드를 화면 중앙의 인식 영역 안에 맞춰주세요.
+    초록색 영역 안에 바코드를 맞춰주세요.
 
 </div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      결과
----------------------------------------- -->
+========================================== -->
 
 <div id="result"></div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      버튼
----------------------------------------- -->
+========================================== -->
 
 <div class="button-area">
 
@@ -360,9 +434,9 @@ button:disabled {
 </div>
 
 
-<!-- ---------------------------------------
+<!-- ==========================================
      디버그
----------------------------------------- -->
+========================================== -->
 
 <div id="debug">
 
@@ -405,27 +479,40 @@ function getFormatName() {
 
 
     if (format === "CODE_39") {
+
         return "CODE 39";
+
     }
+
 
     if (format === "CODE_128") {
+
         return "CODE 128";
+
     }
+
 
     if (format === "QR_CODE") {
+
         return "QR CODE";
+
     }
+
 
     if (format === "DATA_MATRIX") {
+
         return "Data Matrix";
+
     }
 
+
     return format;
+
 }
 
 
 /* ==================================================
-   html5-qrcode 형식 반환
+   html5-qrcode 형식
 ================================================== */
 
 function getSelectedFormat() {
@@ -468,19 +555,34 @@ function getSelectedFormat() {
 
 
 /* ==================================================
-   인식 영역 크기
+   실제 인식 영역 크기
 ================================================== */
 
 function getScanArea() {
 
+
     const format =
         document.getElementById("formatSelect").value;
+
+
+    const reader =
+        document.getElementById("reader");
+
+
+    /*
+       현재 카메라 영역의 실제 가로 크기
+    */
+
+    const readerWidth =
+        reader.clientWidth;
 
 
     /*
        1D 바코드
        CODE 39
        CODE 128
+
+       가로로 길고 세로는 짧게
     */
 
     if (
@@ -488,9 +590,30 @@ function getScanArea() {
         format === "CODE_128"
     ) {
 
+
+        /*
+           최대 380px
+
+           단, 휴대폰 화면이 좁으면
+           화면보다 커지지 않도록 조정
+        */
+
+        const width =
+            Math.min(
+                380,
+                Math.max(
+                    200,
+                    readerWidth - 20
+                )
+            );
+
+
         return {
-            width: 380,
+
+            width: Math.floor(width),
+
             height: 120
+
         };
 
     }
@@ -498,20 +621,59 @@ function getScanArea() {
 
     /*
        2D 바코드
-       QR
+       QR CODE
        Data Matrix
     */
 
+    const width =
+        Math.min(
+            260,
+            Math.max(
+                180,
+                readerWidth - 20
+            )
+        );
+
+
     return {
-        width: 260,
-        height: 260
+
+        width: Math.floor(width),
+
+        height: Math.floor(width)
+
     };
 
 }
 
 
 /* ==================================================
-   상태 표시
+   화면에 스캔 영역 표시
+================================================== */
+
+function updateScanOverlay() {
+
+
+    const scanArea =
+        getScanArea();
+
+
+    const overlay =
+        document.getElementById("scanOverlay");
+
+
+    overlay.style.width =
+        scanArea.width + "px";
+
+
+    overlay.style.height =
+        scanArea.height + "px";
+
+
+}
+
+
+/* ==================================================
+   상태
 ================================================== */
 
 function setStatus(message) {
@@ -523,7 +685,7 @@ function setStatus(message) {
 
 
 /* ==================================================
-   디버그 표시
+   디버그
 ================================================== */
 
 function setDebug(message) {
@@ -540,35 +702,53 @@ function setDebug(message) {
 
 document
     .getElementById("formatSelect")
-    .addEventListener("change", function() {
+    .addEventListener(
+        "change",
+        function() {
 
 
-        /*
-           검사 중에는 바코드 종류 변경 금지
-        */
+            if (inspectionRunning) {
 
-        if (inspectionRunning) {
+                return;
 
-            return;
+            }
+
+
+            const name =
+                getFormatName();
+
+
+            updateScanOverlay();
+
+
+            setStatus(
+                "🔵 " +
+                name +
+                " 선택됨. 검사를 시작하세요."
+            );
+
+
+            setDebug(
+                "선택 형식: " +
+                name
+            );
 
         }
+    );
 
 
-        const name =
-            getFormatName();
+/* ==================================================
+   화면 크기 변경
+================================================== */
 
+window.addEventListener(
+    "resize",
+    function() {
 
-        setStatus(
-            "🔵 " + name +
-            " 선택됨. 검사를 시작하세요."
-        );
+        updateScanOverlay();
 
-
-        setDebug(
-            "선택 형식: " + name
-        );
-
-    });
+    }
+);
 
 
 /* ==================================================
@@ -617,8 +797,7 @@ async function startInspection() {
 
 
     /*
-       검사 시작 후에는
-       바코드 종류 변경 방지
+       바코드 종류 변경 금지
     */
 
     document
@@ -633,6 +812,14 @@ async function startInspection() {
 
     const formatName =
         getFormatName();
+
+
+    /*
+       카메라 시작 전에
+       인식 영역 먼저 표시
+    */
+
+    updateScanOverlay();
 
 
     setStatus(
@@ -653,12 +840,14 @@ async function startInspection() {
     try {
 
 
-        await scanner.start(
+        /*
+           카메라 시작
 
-            /*
-               이전에 정상 작동했던 방식
-               그대로 사용
-            */
+           이전에 정상 작동했던
+           facingMode 방식 유지
+        */
+
+        await scanner.start(
 
             {
                 facingMode: "environment"
@@ -667,12 +856,32 @@ async function startInspection() {
 
             {
 
+                /*
+                   초당 스캔 횟수
+
+                   너무 높이면 휴대폰 CPU 사용량이
+                   증가할 수 있으므로 20 유지
+                */
+
                 fps: 20,
+
+
+                /*
+                   바코드 종류에 따른
+                   실제 인식 영역
+                */
 
                 qrbox: getScanArea(),
 
+
+                /*
+                   선택한 바코드만 인식
+                */
+
                 formatsToSupport: [
+
                     getSelectedFormat()
+
                 ]
 
             },
@@ -685,20 +894,28 @@ async function startInspection() {
         );
 
 
+        /*
+           카메라가 완전히 생성된 후
+           화면의 안내 영역을 다시 맞춤
+        */
+
+        updateScanOverlay();
+
+
         setDebug(
             formatName +
-            " / 카메라 작동 중"
+            " / 카메라 작동 중 / 초점 조정 중..."
         );
 
 
         /*
-           카메라가 생성된 후
-           연속 자동초점 시도
+           카메라가 안정화될 시간을 아주 짧게 준 후
+           연속 자동초점 적용
         */
 
         setTimeout(
             tryContinuousFocus,
-            300
+            100
         );
 
 
@@ -727,7 +944,8 @@ async function startInspection() {
 
 
         setDebug(
-            "카메라 오류: " + error
+            "카메라 오류: " +
+            error
         );
 
     }
@@ -736,10 +954,10 @@ async function startInspection() {
 
 
 /* ==================================================
-   연속 자동초점 시도
+   자동초점 설정
 ================================================== */
 
-function tryContinuousFocus() {
+async function tryContinuousFocus() {
 
 
     try {
@@ -788,6 +1006,10 @@ function tryContinuousFocus() {
             tracks[0];
 
 
+        /*
+           카메라가 지원하는 기능 확인
+        */
+
         if (!track.getCapabilities) {
 
             setDebug(
@@ -805,8 +1027,7 @@ function tryContinuousFocus() {
 
 
         /*
-           브라우저가 continuous focus를
-           지원하는 경우에만 적용
+           연속 자동초점 지원 여부
         */
 
         if (
@@ -817,19 +1038,21 @@ function tryContinuousFocus() {
         ) {
 
 
-            track.applyConstraints({
+            try {
 
-                advanced: [
 
-                    {
-                        focusMode: "continuous"
-                    }
+                await track.applyConstraints({
 
-                ]
+                    advanced: [
 
-            })
+                        {
+                            focusMode:
+                                "continuous"
+                        }
 
-            .then(function() {
+                    ]
+
+                });
 
 
                 setDebug(
@@ -838,13 +1061,11 @@ function tryContinuousFocus() {
                 );
 
 
-            })
-
-            .catch(function(error) {
+            } catch (error) {
 
 
                 console.log(
-                    "자동초점 설정 실패:",
+                    "continuous focus 실패:",
                     error
                 );
 
@@ -854,15 +1075,22 @@ function tryContinuousFocus() {
                     " / 기본 자동초점 사용"
                 );
 
-            });
+            }
 
 
         } else {
 
 
+            /*
+               브라우저가 초점 제어를
+               직접 제공하지 않는 경우
+
+               카메라 자체의 자동초점을 사용
+            */
+
             setDebug(
                 getFormatName() +
-                " / 기본 자동초점 사용"
+                " / 카메라 기본 자동초점 사용"
             );
 
         }
@@ -874,6 +1102,12 @@ function tryContinuousFocus() {
         console.log(
             "자동초점 확인 오류:",
             error
+        );
+
+
+        setDebug(
+            getFormatName() +
+            " / 기본 자동초점 사용"
         );
 
     }
@@ -903,7 +1137,7 @@ function onScanSuccess(
 
 
     /*
-       불일치로 중지된 경우 무시
+       불일치로 정지된 경우
     */
 
     if (inspectionStopped) {
@@ -914,7 +1148,7 @@ function onScanSuccess(
 
 
     /*
-       A 스캔 후 2초 대기 중이면 무시
+       A 인식 후 2초 대기
     */
 
     if (waitingForB) {
@@ -925,7 +1159,7 @@ function onScanSuccess(
 
 
     /*
-       이미 처리 중이면 무시
+       중복 인식 방지
     */
 
     if (processing) {
@@ -949,9 +1183,9 @@ function onScanSuccess(
     );
 
 
-    /* ==================================================
-       A 바코드
-    ================================================== */
+    /* ==========================================
+       A
+    ========================================== */
 
     if (currentTarget === "A") {
 
@@ -979,46 +1213,50 @@ function onScanSuccess(
 
 
         /*
-           A 스캔 후 2초 대기
+           A와 같은 바코드를
+           바로 다시 읽는 것을 방지
         */
 
-        setTimeout(function() {
+        setTimeout(
+            function() {
 
 
-            if (
-                !inspectionRunning ||
-                inspectionStopped
-            ) {
+                if (
+                    !inspectionRunning ||
+                    inspectionStopped
+                ) {
 
-                return;
+                    return;
 
-            }
-
-
-            waitingForB = false;
-
-            processing = false;
+                }
 
 
-            setStatus(
-                "🟡 B 바코드를 스캔하세요."
-            );
+                waitingForB = false;
+
+                processing = false;
 
 
-            setDebug(
-                getFormatName() +
-                " / B 바코드 스캔 대기"
-            );
+                setStatus(
+                    "🟡 B 바코드를 스캔하세요."
+                );
 
 
-        }, 2000);
+                setDebug(
+                    getFormatName() +
+                    " / B 바코드 스캔 대기"
+                );
+
+
+            },
+            2000
+        );
 
     }
 
 
-    /* ==================================================
-       B 바코드
-    ================================================== */
+    /* ==========================================
+       B
+    ========================================== */
 
     else if (currentTarget === "B") {
 
@@ -1039,15 +1277,14 @@ function onScanSuccess(
         );
 
 
-        /*
-           0.2초 후 비교
-        */
+        setTimeout(
+            function() {
 
-        setTimeout(function() {
+                compareBarcode();
 
-            compareBarcode();
-
-        }, 200);
+            },
+            200
+        );
 
     }
 
@@ -1088,15 +1325,15 @@ function compareBarcode() {
 
 
     /*
-       정확하게 문자열 비교
+       정확한 문자열 비교
     */
 
     if (a === b) {
 
 
-        /* ------------------------------------------
+        /*
            일치
-        ------------------------------------------ */
+        */
 
         document
             .getElementById("result")
@@ -1122,23 +1359,25 @@ function compareBarcode() {
 
 
         /*
-           1초 후 자동으로
-           다음 A 검사
+           1초 후 다음 A
         */
 
-        setTimeout(function() {
+        setTimeout(
+            function() {
 
-            nextInspection();
+                nextInspection();
 
-        }, 1000);
+            },
+            1000
+        );
 
 
     } else {
 
 
-        /* ------------------------------------------
+        /*
            불일치
-        ------------------------------------------ */
+        */
 
         inspectionStopped = true;
 
@@ -1165,8 +1404,10 @@ function compareBarcode() {
 
 
         setDebug(
-            "A: " + a +
-            " / B: " + b +
+            "A: " +
+            a +
+            " / B: " +
+            b +
             " / 초기화 버튼을 눌러주세요."
         );
 
@@ -1310,7 +1551,7 @@ async function resetAll() {
 
 
     /*
-       바코드 종류 다시 선택 가능
+       바코드 종류 선택 가능
     */
 
     document
@@ -1321,6 +1562,9 @@ async function resetAll() {
     document
         .getElementById("startBtn")
         .disabled = false;
+
+
+    updateScanOverlay();
 
 
     setStatus(
@@ -1334,8 +1578,17 @@ async function resetAll() {
 
 }
 
+
+/* ==================================================
+   최초 화면
+================================================== */
+
+updateScanOverlay();
+
+
 </script>
 
 </body>
 
 </html>
+```
