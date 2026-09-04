@@ -1,1084 +1,669 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>CODE 39 바코드 검사</title>
-
-
-    <!-- html5-qrcode -->
-    <script
-        src="https://unpkg.com/html5-qrcode"
-        type="text/javascript">
-    </script>
-
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-
-        body {
-
-            font-family: Arial, sans-serif;
-
-            margin: 0;
-
-            padding: 15px;
-
-            background: #f2f2f2;
-
-            text-align: center;
-
-        }
-
-
-        /* ============================= */
-        /* 제목 */
-        /* ============================= */
-
-        h1 {
-
-            margin: 5px 0 15px 0;
-
-            font-size: 28px;
-
-        }
-
-
-        /* ============================= */
-        /* A / B 영역 */
-        /* ============================= */
-
-        .barcode-box {
-
-            background: white;
-
-            border-radius: 12px;
-
-            padding: 12px;
-
-            margin-bottom: 10px;
-
-            box-shadow:
-                0 2px 5px
-                rgba(0,0,0,0.1);
-
-        }
-
-
-        .label {
-
-            font-size: 18px;
-
-            font-weight: bold;
-
-            margin-bottom: 5px;
-
-        }
-
-
-        input {
-
-            width: 100%;
-
-            padding: 12px;
-
-            font-size: 20px;
-
-            text-align: center;
-
-            border: 1px solid #ccc;
-
-            border-radius: 8px;
-
-            background: #f8f8f8;
-
-        }
-
-
-        /* ============================= */
-        /* 상태 */
-        /* ============================= */
-
-        #status {
-
-            margin: 15px 0;
-
-            font-size: 21px;
-
-            font-weight: bold;
-
-        }
-
-
-        /* ============================= */
-        /* 카메라 */
-        /* ============================= */
-
-        #reader {
-
-            width: 100%;
-
-            max-width: 500px;
-
-            margin: auto;
-
-            background: black;
-
-            border-radius: 12px;
-
-            overflow: hidden;
-
-        }
-
-
-        /* ============================= */
-        /* 결과 */
-        /* ============================= */
-
-        #result {
-
-            display: none;
-
-            width: 100%;
-
-            margin-top: 15px;
-
-            padding: 30px 10px;
-
-            border-radius: 15px;
-
-            font-size: 45px;
-
-            font-weight: bold;
-
-        }
-
-
-        .match {
-
-            display: block !important;
-
-            background: #00c853;
-
-            color: white;
-
-        }
-
-
-        .different {
-
-            display: block !important;
-
-            background: #d50000;
-
-            color: white;
-
-        }
-
-
-        /* ============================= */
-        /* 버튼 */
-        /* ============================= */
-
-        button {
-
-            width: 100%;
-
-            padding: 18px;
-
-            margin-top: 10px;
-
-            border: none;
-
-            border-radius: 10px;
-
-            background: #333;
-
-            color: white;
-
-            font-size: 22px;
-
-            font-weight: bold;
-
-        }
-
-
-        #resetButton {
-
-            background: #777;
-
-        }
-
-
-        /* ============================= */
-        /* 디버그 */
-        /* ============================= */
-
-        #debug {
-
-            margin-top: 10px;
-
-            font-size: 13px;
-
-            color: #666;
-
-            word-break: break-all;
-
-        }
-
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>CODE 39 바코드 검사</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        text-align: center;
+    }
+
+    h1 {
+        margin: 10px 0 20px;
+        font-size: 26px;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        gap: 10px;
+    }
+
+    .label {
+        width: 45px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    input {
+        flex: 1;
+        height: 45px;
+        padding: 8px 12px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #f8f8f8;
+    }
+
+    #status {
+        margin: 15px 0;
+        padding: 12px;
+        border-radius: 8px;
+        background: #eee;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    #reader {
+        width: 100%;
+        margin: 15px auto;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    #result {
+        margin: 15px 0;
+        padding: 18px;
+        border-radius: 10px;
+        font-size: 28px;
+        font-weight: bold;
+        min-height: 65px;
+    }
+
+    .match {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .different {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    button {
+        width: 48%;
+        height: 50px;
+        margin: 5px 1%;
+        border: none;
+        border-radius: 8px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #startBtn {
+        background: #007bff;
+        color: white;
+    }
+
+    #resetBtn {
+        background: #6c757d;
+        color: white;
+    }
+
+    button:disabled {
+        opacity: 0.5;
+    }
+
+    #debug {
+        margin-top: 15px;
+        padding: 10px;
+        background: #f0f0f0;
+        color: #555;
+        font-size: 12px;
+        text-align: left;
+        border-radius: 8px;
+        word-break: break-all;
+    }
+</style>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
-
 
 <body>
 
+<div class="container">
 
-    <!-- ============================= -->
-    <!-- 제목 -->
-    <!-- ============================= -->
+    <h1>📦 CODE 39 바코드 검사</h1>
 
-    <h1>
-        📦 CODE 39 바코드 검사
-    </h1>
-
-
-    <!-- ============================= -->
-    <!-- A 바코드 -->
-    <!-- ============================= -->
-
-    <div class="barcode-box">
-
-        <div class="label">
-            A 바코드
-        </div>
-
-        <input
-            type="text"
-            id="barcodeA"
-            placeholder="대기 중"
-            readonly
-        >
-
+    <div class="row">
+        <div class="label">A</div>
+        <input type="text" id="barcodeA" readonly>
     </div>
 
-
-    <!-- ============================= -->
-    <!-- B 바코드 -->
-    <!-- ============================= -->
-
-    <div class="barcode-box">
-
-        <div class="label">
-            B 바코드
-        </div>
-
-        <input
-            type="text"
-            id="barcodeB"
-            placeholder="대기 중"
-            readonly
-        >
-
+    <div class="row">
+        <div class="label">B</div>
+        <input type="text" id="barcodeB" readonly>
     </div>
-
-
-    <!-- ============================= -->
-    <!-- 상태 -->
-    <!-- ============================= -->
 
     <div id="status">
-
-        검사 시작 버튼을 눌러주세요.
-
+        🔵 검사를 시작해주세요.
     </div>
-
-
-    <!-- ============================= -->
-    <!-- 카메라 -->
-    <!-- ============================= -->
 
     <div id="reader"></div>
 
-
-    <!-- ============================= -->
-    <!-- 결과 -->
-    <!-- ============================= -->
-
     <div id="result"></div>
 
+    <div>
+        <button id="startBtn" onclick="startInspection()">
+            검사 시작
+        </button>
 
-    <!-- ============================= -->
-    <!-- 시작 -->
-    <!-- ============================= -->
+        <button id="resetBtn" onclick="resetAll()">
+            초기화
+        </button>
+    </div>
 
-    <button
-        id="startButton"
-        onclick="startInspection()"
-    >
+    <div id="debug">
+        대기 중
+    </div>
 
-        ▶ 검사 시작
-
-    </button>
-
-
-    <!-- ============================= -->
-    <!-- 초기화 -->
-    <!-- ============================= -->
-
-    <button
-        id="resetButton"
-        onclick="resetAll()"
-    >
-
-        🔄 초기화
-
-    </button>
-
-
-    <!-- ============================= -->
-    <!-- 디버그 -->
-    <!-- ============================= -->
-
-    <div id="debug"></div>
-
-
+</div>
 
 <script>
 
+let scanner = null;
 
-    // ==========================================
-    // 전역 변수
-    // ==========================================
+let currentTarget = "A";
 
+let processing = false;
 
-    let scanner = null;
+let inspectionRunning = false;
 
+let inspectionStopped = false;
 
-    // 현재 스캔 대상
-    //
-    // A = A 바코드
-    // B = B 바코드
-
-    let currentTarget = null;
+let waitingForB = false;
 
 
-    // 중복 인식 방지
+// --------------------------------------------------
+// 상태 표시
+// --------------------------------------------------
 
-    let processing = false;
+function setStatus(message) {
 
+    document.getElementById("status").textContent = message;
 
-    // 검사 진행 여부
-
-    let inspectionRunning = false;
-
-
-    // 불일치로 검사 중지 여부
-
-    let inspectionStopped = false;
+}
 
 
-    // A → B 전환 대기 중 여부
+// --------------------------------------------------
+// 디버그 표시
+// --------------------------------------------------
 
-    let waitingForB = false;
+function setDebug(message) {
 
+    document.getElementById("debug").textContent = message;
 
-
-    // ==========================================
-    // 검사 시작
-    // ==========================================
-
-
-    function startInspection() {
+}
 
 
-        if (
-            inspectionRunning
-        ) {
+// --------------------------------------------------
+// 검사 시작
+// --------------------------------------------------
 
-            return;
+async function startInspection() {
 
-        }
-
-
-        inspectionRunning = true;
-
-        inspectionStopped = false;
-
-        waitingForB = false;
-
-
-        document.getElementById(
-            "startButton"
-        ).style.display = "none";
-
-
-        clearData();
-
-
-        startCamera();
-
+    if (inspectionRunning) {
+        return;
     }
 
+    inspectionRunning = true;
+    inspectionStopped = false;
 
+    currentTarget = "A";
+    processing = false;
+    waitingForB = false;
 
-    // ==========================================
-    // 카메라 시작
-    // ==========================================
+    document.getElementById("barcodeA").value = "";
+    document.getElementById("barcodeB").value = "";
 
+    document.getElementById("result").textContent = "";
+    document.getElementById("result").className = "";
 
-    function startCamera() {
+    document.getElementById("startBtn").disabled = true;
 
+    setStatus("🟡 A 바코드를 스캔하세요.");
+    setDebug("카메라 시작 중...");
 
-        currentTarget = "A";
+    scanner = new Html5Qrcode("reader");
 
-        processing = false;
+    try {
 
-
-        document.getElementById(
-            "status"
-        ).innerText =
-            "🔵 A 바코드를 스캔하세요.";
-
-
-        scanner =
-            new Html5Qrcode(
-                "reader"
-            );
-
-
-        const scanConfig = {
-
-
-            // 초당 분석 횟수
-
-            fps: 20,
-
-
-            // CODE 39 가로형 영역
-
-            qrbox: {
-
-                width: 380,
-
-                height: 120
-
-            },
-
-
-            // CODE 39만 인식
-
-            formatsToSupport: [
-
-                Html5QrcodeSupportedFormats.CODE_39
-
-            ]
-
-        };
-
-
-        scanner.start(
-
-            // 후면 카메라
-
+        await scanner.start(
             {
                 facingMode: "environment"
             },
+            {
+                fps: 20,
 
+                qrbox: {
+                    width: 380,
+                    height: 120
+                },
 
-            scanConfig,
-
-
-            // ==================================
-            // 인식 성공
-            // ==================================
-
-            function(
-                decodedText,
-                decodedResult
-            ) {
-
-
-                console.log(
-                    "인식:",
-                    decodedText
-                );
-
-
-                document.getElementById(
-                    "debug"
-                ).innerText =
-                    "최근 인식값 : " +
-                    decodedText;
-
-
-                // 검사 중지 상태
-
-                if (
-                    inspectionStopped
-                ) {
-
-                    return;
-
-                }
-
-
-                // A → B 전환 대기 중
-
-                if (
-                    waitingForB
-                ) {
-
-                    return;
-
-                }
-
-
-                // 중복 인식 방지
-
-                if (
-                    processing
-                ) {
-
-                    return;
-
-                }
-
-
-                processing =
-                    true;
-
-
-                barcodeDetected(
-                    decodedText
-                );
-
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.CODE_39
+                ]
             },
+            onScanSuccess,
+            onScanFailure
+        );
 
+        setDebug("카메라 작동 중 / CODE 39 대기");
 
-            // ==================================
-            // 인식 실패
-            // ==================================
+        // 카메라가 실제로 생성된 후 자동초점 시도
+        setTimeout(tryContinuousFocus, 300);
 
-            function(errorMessage) {
+    } catch (error) {
 
-                // 무시
+        console.error(error);
 
-            }
+        inspectionRunning = false;
 
-        )
+        document.getElementById("startBtn").disabled = false;
 
+        setStatus("❌ 카메라를 시작할 수 없습니다.");
 
-        .then(function() {
-
-
-            console.log(
-                "카메라 시작 완료"
-            );
-
-        })
-
-
-        .catch(function(error) {
-
-
-            console.error(
-                "카메라 오류:",
-                error
-            );
-
-
-            inspectionRunning =
-                false;
-
-
-            document.getElementById(
-                "startButton"
-            ).style.display =
-                "block";
-
-
-            document.getElementById(
-                "status"
-            ).innerText =
-                "❌ 카메라를 시작할 수 없습니다.";
-
-
-            document.getElementById(
-                "debug"
-            ).innerText =
-                "오류 : " +
-                error;
-
-        });
-
+        setDebug(
+            "카메라 오류: " + error
+        );
     }
 
+}
 
 
-    // ==========================================
-    // 바코드 인식 처리
-    // ==========================================
+// --------------------------------------------------
+// 연속 자동초점 시도
+// --------------------------------------------------
 
+function tryContinuousFocus() {
 
-    function barcodeDetected(value) {
+    try {
 
+        const video = document.querySelector("#reader video");
 
-        value =
-            value.trim();
+        if (!video) {
+            setDebug("카메라 작동 중 / 자동초점 설정 미지원");
+            return;
+        }
 
+        if (!video.srcObject) {
+            setDebug("카메라 작동 중 / 자동초점 설정 미지원");
+            return;
+        }
 
-        // ======================================
-        // A 바코드
-        // ======================================
+        const tracks = video.srcObject.getVideoTracks();
 
+        if (!tracks || tracks.length === 0) {
+            return;
+        }
+
+        const track = tracks[0];
+
+        if (!track.getCapabilities) {
+            setDebug("카메라 작동 중 / 자동초점 설정 미지원");
+            return;
+        }
+
+        const capabilities = track.getCapabilities();
 
         if (
-            currentTarget === "A"
+            capabilities.focusMode &&
+            capabilities.focusMode.includes("continuous")
         ) {
 
-
-            document.getElementById(
-                "barcodeA"
-            ).value =
-                value;
-
-
-            // A → B 전환 대기 시작
-
-            waitingForB =
-                true;
-
-
-            document.getElementById(
-                "status"
-            ).innerText =
-                "✅ A 완료";
-
-
-            // ==================================
-            // 2초 대기
-            // ==================================
-
-
-            setTimeout(function() {
-
-
-                // 검사 중지되었으면 종료
-
-                if (
-                    inspectionStopped
-                ) {
-
-                    return;
-
-                }
-
-
-                // B로 변경
-
-                currentTarget =
-                    "B";
-
-
-                waitingForB =
-                    false;
-
-
-                processing =
-                    false;
-
-
-                document.getElementById(
-                    "status"
-                ).innerText =
-                    "🟡 B 바코드를 스캔하세요.";
-
-
-            }, 2000);
-
-        }
-
-
-        // ======================================
-        // B 바코드
-        // ======================================
-
-
-        else if (
-            currentTarget === "B"
-        ) {
-
-
-            document.getElementById(
-                "barcodeB"
-            ).value =
-                value;
-
-
-            document.getElementById(
-                "status"
-            ).innerText =
-                "✅ B 완료";
-
-
-            // 비교
-
-            setTimeout(function() {
-
-
-                compareBarcode();
-
-
-            }, 200);
-
-        }
-
-    }
-
-
-
-    // ==========================================
-    // A / B 비교
-    // ==========================================
-
-
-    function compareBarcode() {
-
-
-        const barcodeA =
-            document.getElementById(
-                "barcodeA"
-            ).value.trim();
-
-
-        const barcodeB =
-            document.getElementById(
-                "barcodeB"
-            ).value.trim();
-
-
-        const result =
-            document.getElementById(
-                "result"
-            );
-
-
-        // ======================================
-        // 일치
-        // ======================================
-
-
-        if (
-            barcodeA === barcodeB
-        ) {
-
-
-            result.innerText =
-                "✓ 일치";
-
-
-            result.className =
-                "match";
-
-
-            result.style.display =
-                "block";
-
-
-            document.getElementById(
-                "status"
-            ).innerText =
-                "🟢 일치";
-
-
-            // ==================================
-            // 1초 후 A부터 다시 시작
-            // ==================================
-
-
-            setTimeout(function() {
-
-
-                if (
-                    inspectionRunning &&
-                    !inspectionStopped
-                ) {
-
-
-                    nextInspection();
-
-                }
-
-
-            }, 1000);
-
-        }
-
-
-        // ======================================
-        // 불일치
-        // ======================================
-
-
-        else {
-
-
-            inspectionStopped =
-                true;
-
-
-            inspectionRunning =
-                false;
-
-
-            processing =
-                true;
-
-
-            result.innerText =
-                "✕ 불일치";
-
-
-            result.className =
-                "different";
-
-
-            result.style.display =
-                "block";
-
-
-            document.getElementById(
-                "status"
-            ).innerText =
-                "🔴 불일치 - 검사 중지";
-
-
-            document.getElementById(
-                "debug"
-            ).innerText =
-                "검사가 중지되었습니다. " +
-                "초기화 버튼을 눌러주세요.";
-
-        }
-
-    }
-
-
-
-    // ==========================================
-    // 다음 검사
-    // ==========================================
-
-
-    function nextInspection() {
-
-
-        clearData();
-
-
-        currentTarget =
-            "A";
-
-
-        processing =
-            false;
-
-
-        inspectionStopped =
-            false;
-
-
-        waitingForB =
-            false;
-
-
-        inspectionRunning =
-            true;
-
-
-        document.getElementById(
-            "status"
-        ).innerText =
-            "🔵 A 바코드를 스캔하세요.";
-
-    }
-
-
-
-    // ==========================================
-    // 데이터 초기화
-    // ==========================================
-
-
-    function clearData() {
-
-
-        document.getElementById(
-            "barcodeA"
-        ).value =
-            "";
-
-
-        document.getElementById(
-            "barcodeB"
-        ).value =
-            "";
-
-
-        const result =
-            document.getElementById(
-                "result"
-            );
-
-
-        result.innerText =
-            "";
-
-
-        result.className =
-            "";
-
-
-        result.style.display =
-            "none";
-
-
-        document.getElementById(
-            "debug"
-        ).innerText =
-            "";
-
-    }
-
-
-
-    // ==========================================
-    // 전체 초기화
-    // ==========================================
-
-
-    function resetAll() {
-
-
-        inspectionRunning =
-            false;
-
-
-        inspectionStopped =
-            false;
-
-
-        processing =
-            false;
-
-
-        waitingForB =
-            false;
-
-
-        currentTarget =
-            null;
-
-
-        // ======================================
-        // 카메라 정지
-        // ======================================
-
-
-        if (
-            scanner !== null
-        ) {
-
-
-            const oldScanner =
-                scanner;
-
-
-            scanner =
-                null;
-
-
-            oldScanner.stop()
-
-
+            track.applyConstraints({
+                advanced: [
+                    {
+                        focusMode: "continuous"
+                    }
+                ]
+            })
             .then(function() {
 
-
-                try {
-
-                    oldScanner.clear();
-
-                }
-
-                catch (e) {
-
-                }
+                setDebug(
+                    "카메라 작동 중 / 연속 자동초점 활성화"
+                );
 
             })
-
-
             .catch(function(error) {
 
-
                 console.log(
-                    "카메라 정지 오류:",
+                    "자동초점 설정 실패:",
                     error
                 );
 
-
-                try {
-
-                    oldScanner.clear();
-
-                }
-
-                catch (e) {
-
-                }
+                setDebug(
+                    "카메라 작동 중 / 기본 자동초점 사용"
+                );
 
             });
 
+        } else {
+
+            setDebug(
+                "카메라 작동 중 / 기본 자동초점 사용"
+            );
+
         }
 
+    } catch (error) {
 
-        // 데이터 초기화
+        console.log(
+            "자동초점 확인 오류:",
+            error
+        );
 
-        clearData();
+    }
 
-
-        // 상태 초기화
-
-        document.getElementById(
-            "status"
-        ).innerText =
-            "검사 시작 버튼을 눌러주세요.";
+}
 
 
-        // 시작 버튼 표시
+// --------------------------------------------------
+// 바코드 스캔 성공
+// --------------------------------------------------
 
-        document.getElementById(
-            "startButton"
-        ).style.display =
-            "block";
+function onScanSuccess(decodedText, decodedResult) {
+
+    if (!inspectionRunning) {
+        return;
+    }
+
+    if (inspectionStopped) {
+        return;
+    }
+
+    if (waitingForB) {
+        return;
+    }
+
+    if (processing) {
+        return;
+    }
+
+    processing = true;
+
+    const barcode = decodedText.trim();
+
+    setDebug(
+        "인식: " + barcode
+    );
+
+
+    // --------------------------------------------------
+    // A 바코드
+    // --------------------------------------------------
+
+    if (currentTarget === "A") {
+
+        document.getElementById("barcodeA").value = barcode;
+
+        setStatus("✅ A 완료");
+
+        currentTarget = "B";
+
+        waitingForB = true;
+
+        setDebug(
+            "A 인식 완료 / 2초 후 B 스캔 시작"
+        );
+
+
+        // A 스캔 후 2초 대기
+        setTimeout(function() {
+
+            if (!inspectionRunning || inspectionStopped) {
+                return;
+            }
+
+            waitingForB = false;
+
+            processing = false;
+
+            setStatus(
+                "🟡 B 바코드를 스캔하세요."
+            );
+
+            setDebug(
+                "B 바코드 스캔 대기"
+            );
+
+        }, 2000);
 
     }
 
 
+    // --------------------------------------------------
+    // B 바코드
+    // --------------------------------------------------
+
+    else if (currentTarget === "B") {
+
+        document.getElementById("barcodeB").value = barcode;
+
+        setStatus("✅ B 완료");
+
+        setDebug(
+            "A / B 비교 중..."
+        );
+
+        setTimeout(function() {
+
+            compareBarcode();
+
+        }, 200);
+
+    }
+
+}
+
+
+// --------------------------------------------------
+// 스캔 실패
+// --------------------------------------------------
+
+function onScanFailure(error) {
+
+    // 정상적인 스캔 대기 상태에서는
+    // 오류 메시지를 표시하지 않음
+
+}
+
+
+// --------------------------------------------------
+// A / B 비교
+// --------------------------------------------------
+
+function compareBarcode() {
+
+    const a =
+        document.getElementById("barcodeA").value;
+
+    const b =
+        document.getElementById("barcodeB").value;
+
+
+    if (a === b) {
+
+        // ----------------------------------------------
+        // 일치
+        // ----------------------------------------------
+
+        document.getElementById("result").textContent =
+            "✓ 일치";
+
+        document.getElementById("result").className =
+            "match";
+
+        setStatus(
+            "🟢 일치"
+        );
+
+        setDebug(
+            "A와 B가 일치합니다. 1초 후 다음 검사."
+        );
+
+
+        setTimeout(function() {
+
+            nextInspection();
+
+        }, 1000);
+
+    } else {
+
+        // ----------------------------------------------
+        // 불일치
+        // ----------------------------------------------
+
+        inspectionStopped = true;
+
+        inspectionRunning = false;
+
+        processing = true;
+
+        document.getElementById("result").textContent =
+            "✕ 불일치";
+
+        document.getElementById("result").className =
+            "different";
+
+        setStatus(
+            "🔴 불일치 - 검사 중지"
+        );
+
+        setDebug(
+            "A: " + a +
+            " / B: " + b +
+            " / 초기화 버튼을 눌러주세요."
+        );
+
+    }
+
+}
+
+
+// --------------------------------------------------
+// 다음 검사
+// --------------------------------------------------
+
+function nextInspection() {
+
+    if (inspectionStopped) {
+        return;
+    }
+
+    document.getElementById("barcodeA").value = "";
+
+    document.getElementById("barcodeB").value = "";
+
+    document.getElementById("result").textContent = "";
+
+    document.getElementById("result").className = "";
+
+    currentTarget = "A";
+
+    processing = false;
+
+    waitingForB = false;
+
+    inspectionRunning = true;
+
+    setStatus(
+        "🟡 A 바코드를 스캔하세요."
+    );
+
+    setDebug(
+        "다음 검사 대기"
+    );
+
+}
+
+
+// --------------------------------------------------
+// 초기화
+// --------------------------------------------------
+
+async function resetAll() {
+
+    inspectionRunning = false;
+
+    inspectionStopped = false;
+
+    processing = false;
+
+    waitingForB = false;
+
+    currentTarget = "A";
+
+
+    if (scanner) {
+
+        try {
+
+            await scanner.stop();
+
+        } catch (error) {
+
+            console.log(
+                "카메라 정지 오류:",
+                error
+            );
+
+        }
+
+        try {
+
+            scanner.clear();
+
+        } catch (error) {
+
+            console.log(
+                "스캐너 초기화 오류:",
+                error
+            );
+
+        }
+
+        scanner = null;
+
+    }
+
+
+    document.getElementById("barcodeA").value = "";
+
+    document.getElementById("barcodeB").value = "";
+
+    document.getElementById("result").textContent = "";
+
+    document.getElementById("result").className = "";
+
+    document.getElementById("startBtn").disabled = false;
+
+    setStatus(
+        "🔵 검사를 시작해주세요."
+    );
+
+    setDebug(
+        "대기 중"
+    );
+
+}
+
 </script>
 
-
 </body>
-
 </html>
+```
