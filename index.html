@@ -121,30 +121,15 @@ input {
     background: #000;
 }
 
-
-/*
-   카메라 영상
-*/
-
 #reader video {
     width: 100% !important;
     height: auto !important;
     display: block;
 }
 
-
-/*
-   html5-qrcode 인식 영역
-*/
-
 #reader__scan_region {
     position: relative;
 }
-
-
-/*
-   인식 영역 테두리
-*/
 
 #reader__scan_region > div {
     border-color: #00ff66 !important;
@@ -419,6 +404,35 @@ let inspectionStopped = false;
 let waitingForB = false;
 
 
+/*
+   CODE 128 연속 인식 검증용
+*/
+
+let code128Candidate = "";
+
+let code128Count = 0;
+
+let code128LastTime = 0;
+
+
+/*
+   CODE 128에서 같은 값이
+   몇 번 연속 나와야 인정할지
+*/
+
+const CODE128_REQUIRED_COUNT = 3;
+
+
+/*
+   CODE 128 연속 인식 허용 시간
+
+   너무 오래 지난 인식은
+   같은 값이어도 다시 시작
+*/
+
+const CODE128_MAX_INTERVAL = 800;
+
+
 /* ==================================================
    바코드 종류 이름
 ================================================== */
@@ -517,16 +531,13 @@ function getScanArea() {
 
 
     /*
-       ----------------------------------------------
        CODE 39 / CODE 128
-       ----------------------------------------------
     */
 
     if (
         format === "CODE_39" ||
         format === "CODE_128"
     ) {
-
 
         return {
 
@@ -540,9 +551,7 @@ function getScanArea() {
 
 
     /*
-       ----------------------------------------------
        QR / Data Matrix
-       ----------------------------------------------
     */
 
     return {
@@ -583,6 +592,21 @@ function setDebug(message) {
 
 
 /* ==================================================
+   CODE 128 검증값 초기화
+================================================== */
+
+function resetCode128Validation() {
+
+    code128Candidate = "";
+
+    code128Count = 0;
+
+    code128LastTime = 0;
+
+}
+
+
+/* ==================================================
    바코드 종류 변경
 ================================================== */
 
@@ -598,6 +622,9 @@ document
                 return;
 
             }
+
+
+            resetCode128Validation();
 
 
             const name =
@@ -643,6 +670,9 @@ async function startInspection() {
     processing = false;
 
     waitingForB = false;
+
+
+    resetCode128Validation();
 
 
     document
@@ -709,9 +739,6 @@ async function startInspection() {
            ==========================================
            카메라 시작
            ==========================================
-
-           중요:
-           기존 정상 작동 방식 유지
         */
 
         await scanner.start(
@@ -723,23 +750,9 @@ async function startInspection() {
 
             {
 
-                /*
-                   초당 인식 횟수
-                */
-
                 fps: 20,
 
-
-                /*
-                   실제 인식 영역
-                */
-
                 qrbox: scanArea,
-
-
-                /*
-                   선택한 바코드만 인식
-                */
 
                 formatsToSupport: [
 
@@ -757,10 +770,6 @@ async function startInspection() {
         );
 
 
-        /*
-           카메라 시작 성공
-        */
-
         setDebug(
             formatName +
             " / 인식영역 " +
@@ -772,9 +781,7 @@ async function startInspection() {
 
 
         /*
-           초점 개선 시작
-
-           카메라가 완전히 시작된 뒤 실행
+           자동초점
         */
 
         startFocusOptimization();
@@ -820,22 +827,14 @@ async function startInspection() {
 
 
 /* ==================================================
-   초점 최적화 시작
+   초점 최적화
 ================================================== */
 
 function startFocusOptimization() {
 
 
-    /*
-       즉시 1회
-    */
-
     applyBestFocus();
 
-
-    /*
-       300ms 후
-    */
 
     setTimeout(
         function() {
@@ -847,10 +846,6 @@ function startFocusOptimization() {
     );
 
 
-    /*
-       800ms 후
-    */
-
     setTimeout(
         function() {
 
@@ -860,10 +855,6 @@ function startFocusOptimization() {
         800
     );
 
-
-    /*
-       1500ms 후
-    */
 
     setTimeout(
         function() {
@@ -878,7 +869,7 @@ function startFocusOptimization() {
 
 
 /* ==================================================
-   최적 초점 설정
+   자동초점
 ================================================== */
 
 async function applyBestFocus() {
@@ -887,24 +878,13 @@ async function applyBestFocus() {
     try {
 
 
-        /*
-           현재 카메라 영상
-        */
-
         const video =
             document.querySelector(
                 "#reader video"
             );
 
 
-        if (!video) {
-
-            return;
-
-        }
-
-
-        if (!video.srcObject) {
+        if (!video || !video.srcObject) {
 
             return;
 
@@ -929,17 +909,7 @@ async function applyBestFocus() {
             tracks[0];
 
 
-        /*
-           카메라 capability가 없는
-           브라우저도 존재함
-        */
-
         if (!track.getCapabilities) {
-
-            setDebug(
-                getFormatName() +
-                " / 카메라 기본 자동초점 사용"
-            );
 
             return;
 
@@ -951,10 +921,7 @@ async function applyBestFocus() {
 
 
         /*
-           ==========================================
-           1단계
            연속 자동초점
-           ==========================================
         */
 
         if (
@@ -982,16 +949,10 @@ async function applyBestFocus() {
                 });
 
 
-                setDebug(
-                    getFormatName() +
-                    " / 연속 자동초점 활성화"
-                );
-
-
                 return;
 
-            } catch (error) {
 
+            } catch (error) {
 
                 console.log(
                     "continuous focus 실패:",
@@ -1004,10 +965,7 @@ async function applyBestFocus() {
 
 
         /*
-           ==========================================
-           2단계
-           single-shot focus
-           ==========================================
+           single-shot
         */
 
         if (
@@ -1035,16 +993,10 @@ async function applyBestFocus() {
                 });
 
 
-                setDebug(
-                    getFormatName() +
-                    " / 자동초점 실행"
-                );
-
-
                 return;
 
-            } catch (error) {
 
+            } catch (error) {
 
                 console.log(
                     "single-shot focus 실패:",
@@ -1056,102 +1008,11 @@ async function applyBestFocus() {
         }
 
 
-        /*
-           ==========================================
-           3단계
-           focusDistance
-           ==========================================
-
-           지원하는 카메라에서만 사용
-        */
-
-        if (
-            capabilities.focusDistance &&
-            capabilities.focusDistance.min !== undefined &&
-            capabilities.focusDistance.max !== undefined
-        ) {
-
-
-            try {
-
-
-                /*
-                   가까운 바코드 검사에 적합하도록
-                   focusDistance 범위를 계산
-
-                   min쪽이 가까운 초점인 카메라가
-                   일반적이지만 기기마다 다를 수 있어
-                   아주 공격적으로 설정하지 않음.
-                */
-
-                const min =
-                    capabilities.focusDistance.min;
-
-
-                const max =
-                    capabilities.focusDistance.max;
-
-
-                const distance =
-                    min +
-                    (
-                        (max - min) *
-                        0.20
-                    );
-
-
-                await track.applyConstraints({
-
-                    advanced: [
-
-                        {
-                            focusDistance:
-                                distance
-                        }
-
-                    ]
-
-                });
-
-
-                setDebug(
-                    getFormatName() +
-                    " / 근거리 초점 적용"
-                );
-
-
-            } catch (error) {
-
-
-                console.log(
-                    "focusDistance 실패:",
-                    error
-                );
-
-
-                setDebug(
-                    getFormatName() +
-                    " / 카메라 기본 자동초점 사용"
-                );
-
-            }
-
-        } else {
-
-
-            setDebug(
-                getFormatName() +
-                " / 카메라 기본 자동초점 사용"
-            );
-
-        }
-
-
     } catch (error) {
 
 
         console.log(
-            "초점 최적화 오류:",
+            "초점 설정 오류:",
             error
         );
 
@@ -1198,16 +1059,226 @@ function onScanSuccess(
     }
 
 
-    processing = true;
-
-
     const barcode =
         decodedText.trim();
 
 
+    /*
+       ==========================================
+       CODE 128 특별 처리
+       ==========================================
+    */
+
+    const format =
+        document.getElementById("formatSelect").value;
+
+
+    if (format === "CODE_128") {
+
+
+        const verified =
+            verifyCode128(barcode);
+
+
+        /*
+           아직 확정되지 않은 값
+        */
+
+        if (!verified) {
+
+            return;
+
+        }
+
+
+        /*
+           검증 완료된 값
+        */
+
+        processBarcode(verified);
+
+        return;
+
+    }
+
+
+    /*
+       ==========================================
+       CODE 39 / QR / Data Matrix
+       ==========================================
+    */
+
+    processBarcode(barcode);
+
+}
+
+
+/* ==================================================
+   CODE 128 연속값 검증
+================================================== */
+
+function verifyCode128(barcode) {
+
+
+    const now =
+        Date.now();
+
+
+    /*
+       처음 들어온 값
+    */
+
+    if (code128Candidate === "") {
+
+
+        code128Candidate =
+            barcode;
+
+
+        code128Count = 1;
+
+        code128LastTime = now;
+
+
+        setDebug(
+            "CODE 128 후보: " +
+            barcode +
+            " / 1/" +
+            CODE128_REQUIRED_COUNT
+        );
+
+
+        return null;
+
+    }
+
+
+    /*
+       같은 값인지 확인
+    */
+
+    if (
+        barcode === code128Candidate &&
+        (now - code128LastTime) <= CODE128_MAX_INTERVAL
+    ) {
+
+
+        code128Count++;
+
+        code128LastTime = now;
+
+
+        setDebug(
+            "CODE 128 후보: " +
+            barcode +
+            " / " +
+            code128Count +
+            "/" +
+            CODE128_REQUIRED_COUNT
+        );
+
+
+        /*
+           3회 연속 동일하면 확정
+        */
+
+        if (
+            code128Count >=
+            CODE128_REQUIRED_COUNT
+        ) {
+
+
+            const verified =
+                code128Candidate;
+
+
+            resetCode128Validation();
+
+
+            setDebug(
+                "CODE 128 확정: " +
+                verified
+            );
+
+
+            return verified;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /*
+       다른 값이 들어온 경우
+       새로운 후보로 교체
+    */
+
+    code128Candidate =
+        barcode;
+
+
+    code128Count = 1;
+
+    code128LastTime = now;
+
+
+    setDebug(
+        "CODE 128 후보 변경: " +
+        barcode +
+        " / 1/" +
+        CODE128_REQUIRED_COUNT
+    );
+
+
+    return null;
+
+}
+
+
+/* ==================================================
+   실제 바코드 처리
+================================================== */
+
+function processBarcode(barcode) {
+
+
+    if (!inspectionRunning) {
+
+        return;
+
+    }
+
+
+    if (inspectionStopped) {
+
+        return;
+
+    }
+
+
+    if (waitingForB) {
+
+        return;
+
+    }
+
+
+    if (processing) {
+
+        return;
+
+    }
+
+
+    processing = true;
+
+
     setDebug(
         getFormatName() +
-        " / 인식: " +
+        " / 최종 인식: " +
         barcode
     );
 
@@ -1258,6 +1329,9 @@ function onScanSuccess(
                 waitingForB = false;
 
                 processing = false;
+
+
+                resetCode128Validation();
 
 
                 setStatus(
@@ -1325,7 +1399,7 @@ function onScanFailure(error) {
 
 
 /* ==================================================
-   A / B 비교
+   비교
 ================================================== */
 
 function compareBarcode() {
@@ -1345,10 +1419,6 @@ function compareBarcode() {
 
     if (a === b) {
 
-
-        /*
-           일치
-        */
 
         document
             .getElementById("result")
@@ -1385,10 +1455,6 @@ function compareBarcode() {
 
     } else {
 
-
-        /*
-           불일치
-        */
 
         inspectionStopped = true;
 
@@ -1470,6 +1536,9 @@ function nextInspection() {
     inspectionRunning = true;
 
 
+    resetCode128Validation();
+
+
     setStatus(
         "🟡 A 바코드를 스캔하세요."
     );
@@ -1479,7 +1548,6 @@ function nextInspection() {
         getFormatName() +
         " / 다음 A 바코드 대기"
     );
-
 
 }
 
@@ -1500,6 +1568,9 @@ async function resetAll() {
     waitingForB = false;
 
     currentTarget = "A";
+
+
+    resetCode128Validation();
 
 
     if (scanner) {
